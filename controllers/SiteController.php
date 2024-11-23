@@ -26,13 +26,13 @@ class SiteController extends Controller
     {
         $model = new User();
 
-        // Если данные были отправлены и форма валидна, сохраняем пользователя
+
         if ($model->load(Yii::$app->request->post()) && $model->signup()) {
             Yii::$app->session->setFlash('success', 'Регистрация прошла успешно! Теперь вы можете войти.');
-            return $this->redirect(['site/login']); // Перенаправляем на страницу входа
+            return $this->redirect(['site/login']);
         }
 
-        return $this->render('signup', ['model' => $model]); // Отображаем форму регистрации
+        return $this->render('signup', ['model' => $model]);
     }
 
     /**
@@ -49,7 +49,7 @@ class SiteController extends Controller
             return $this->goBack();
         }
 
-        $model->password = ''; // Очищаем пароль при неправильном вводе
+        $model->password = '';
         return $this->render('login', ['model' => $model]);
     }
 

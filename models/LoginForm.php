@@ -13,9 +13,7 @@ class LoginForm extends Model
 
     private $_user;
 
-    /**
-     * Правила валидации
-     */
+
     public function rules()
     {
         return [
@@ -25,9 +23,7 @@ class LoginForm extends Model
         ];
     }
 
-    /**
-     * Валидация пароля
-     */
+
     public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {
@@ -38,9 +34,7 @@ class LoginForm extends Model
         }
     }
 
-    /**
-     * Получить пользователя по имени
-     */
+
     public function getUser()
     {
         if ($this->_user === null) {
@@ -49,9 +43,7 @@ class LoginForm extends Model
         return $this->_user;
     }
 
-    /**
-     * Логин
-     */
+
     public function login()
     {
         if ($this->validate()) {

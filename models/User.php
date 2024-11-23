@@ -34,9 +34,9 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'email', 'password'], 'required'], // Все обязательные поля
-            ['email', 'email'], // Проверка email
-            ['password', 'string', 'min' => 6], // Минимальная длина пароля
+            [['username', 'email', 'password'], 'required'],
+            ['email', 'email'],
+            ['password', 'string', 'min' => 6],
         ];
     }
 
@@ -46,11 +46,11 @@ class User extends ActiveRecord implements IdentityInterface
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-            // Хешируем пароль, если он был задан
+
             if (!empty($this->password)) {
                 $this->password_hash = Yii::$app->security->generatePasswordHash($this->password);
             }
-            // Генерируем auth_key
+
             if (empty($this->auth_key)) {
                 $this->auth_key = Yii::$app->security->generateRandomString();
             }
@@ -66,7 +66,7 @@ class User extends ActiveRecord implements IdentityInterface
     public function signup()
     {
         if ($this->validate()) {
-            // Сохраняем модель в базу
+
             return $this->save();
         }
         return false;
