@@ -28,9 +28,7 @@ class User extends ActiveRecord implements IdentityInterface
         return 'user';
     }
 
-    /**
-     * Правила валидации
-     */
+
     public function rules()
     {
         return [
@@ -40,9 +38,7 @@ class User extends ActiveRecord implements IdentityInterface
         ];
     }
 
-    /**
-     * Хешируем пароль перед сохранением
-     */
+
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
@@ -59,10 +55,7 @@ class User extends ActiveRecord implements IdentityInterface
         return false;
     }
 
-    /**
-     * Создаём пользователя и сохраняем в БД
-     * @return bool
-     */
+
     public function signup()
     {
         if ($this->validate()) {
@@ -118,7 +111,6 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Метод для проверки пароля
      * @param string $password
      * @return bool
      */
