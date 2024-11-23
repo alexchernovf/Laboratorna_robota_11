@@ -1,5 +1,4 @@
 <?php
-
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -36,7 +35,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'year',
             'created_at',
             'updated_at',
-            'image',
+            [
+                'label' => 'Image',
+                'value' => function ($model) {
+                    if ($model->image) {
+                        return Html::img('data:image/jpeg;base64,' . base64_encode($model->image), ['width' => '200px']);
+                    }
+                    return 'No image';
+                },
+                'format' => 'raw',
+            ],
         ],
     ]) ?>
 

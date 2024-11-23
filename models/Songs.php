@@ -2,18 +2,6 @@
 
 namespace app\models;
 
-/**
- * This is the model class for table "Songs".
- *
- * @property int $id
- * @property string $name
- * @property string $artist
- * @property string|null $genre
- * @property int|null $year
- * @property string $created_at
- * @property string $updated_at
- * @property resource|null $image
- */
 class Songs extends \yii\db\ActiveRecord
 {
     /**
@@ -33,7 +21,7 @@ class Songs extends \yii\db\ActiveRecord
             [['name', 'artist'], 'required'],
             [['year'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['image'], 'string'],
+            [['image'], 'file', 'extensions' => 'jpg, jpeg, png', 'mimeTypes' => 'image/jpeg, image/png'], // добавляем правила для загрузки изображений
             [['name', 'artist', 'genre'], 'string', 'max' => 255],
         ];
     }
@@ -53,5 +41,16 @@ class Songs extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'image' => 'Image',
         ];
+    }
+
+    // Этот метод сохраняет изображение в базу данных
+    public function uploadImage()
+    {
+        if ($this->image && $this->validate()) {
+            // Сохраняем изображение в виде бинарных данных
+            $this->image = file_get_contents($this->image->tempName);
+            return true;
+        }
+        return false;
     }
 }

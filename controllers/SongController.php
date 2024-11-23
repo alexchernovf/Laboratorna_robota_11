@@ -43,7 +43,6 @@ class SongController extends Controller
         return parent::beforeAction($action);
     }
 
-
     /**
      * Lists all Songs models.
      *
@@ -83,7 +82,8 @@ class SongController extends Controller
         $model = new Songs();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
+            // Проверяем, загружен ли файл и сохраняем изображение
+            if ($model->load($this->request->post()) && $model->uploadImage() && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         } else {
@@ -106,15 +106,16 @@ class SongController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post()) && $model->uploadImage() && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('update', [
             'model' => $model,
         ]);
     }
-
     /**
      * Deletes an existing Songs model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
