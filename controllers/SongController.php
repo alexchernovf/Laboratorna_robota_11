@@ -87,7 +87,7 @@ class SongController extends Controller
             $file = UploadedFile::getInstance($model, 'image');
 
             if ($file) {
-                // Указываем путь для сохранения файла
+
                 $filePath = Yii::getAlias('@webroot/uploads/' . $file->baseName . '.' . $file->extension);
 
 
