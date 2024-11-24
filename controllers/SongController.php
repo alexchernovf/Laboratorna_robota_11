@@ -9,6 +9,7 @@ use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\ForbiddenHttpException;
+use yii\web\UploadedFile;
 
 /**
  * SongController implements the CRUD actions for Songs model.
@@ -33,21 +34,21 @@ class SongController extends Controller
         );
     }
 
+    /**
+     * Lists all Songs models.
+     *
+     * @return string
+     */
     public function beforeAction($action)
     {
-        // Перевірка, чи є користувач авторизованим і чи має права адміністратора
-        if (Yii::$app->user->isGuest || !Yii::$app->user->identity->is_admin) {
+        // Перевірка, чи є користувач авторизованим і чи має роль адміністратора
+        if (Yii::$app->user->isGuest || Yii::$app->user->identity->is_admin != 1) {
             throw new ForbiddenHttpException('You do not have permission to access this page.');
         }
 
         return parent::beforeAction($action);
     }
 
-    /**
-     * Lists all Songs models.
-     *
-     * @return string
-     */
     public function actionIndex()
     {
         $searchModel = new SongSearch();
@@ -81,18 +82,28 @@ class SongController extends Controller
     {
         $model = new Songs();
 
-        if ($this->request->isPost) {
-            // Проверяем, загружен ли файл и сохраняем изображение
-            if ($model->load($this->request->post()) && $model->uploadImage() && $model->save()) {
+        if (Yii::$app->request->isPost) {
+            $model->load(Yii::$app->request->post());
+            $file = UploadedFile::getInstance($model, 'image');
+
+            if ($file) {
+                // Указываем путь для сохранения файла
+                $filePath = Yii::getAlias('@webroot/uploads/' . $file->baseName . '.' . $file->extension);
+
+
+                if ($file->saveAs($filePath)) {
+                    $model->image = 'uploads/' . $file->baseName . '.' . $file->extension;
+                } else {
+                    Yii::error("Помилка при завантаженні зображення.");
+                }
+            }
+
+            if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
-        } else {
-            $model->loadDefaultValues();
         }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        return $this->render('create', ['model' => $model]);
     }
 
     /**
@@ -106,16 +117,30 @@ class SongController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->uploadImage() && $model->save()) {
+        if (Yii::$app->request->isPost) {
+            $model->load(Yii::$app->request->post());
+            $file = UploadedFile::getInstance($model, 'image');
+
+            if ($file) {
+
+                $filePath = Yii::getAlias('@webroot/uploads/' . $file->baseName . '.' . $file->extension);
+
+
+                if ($file->saveAs($filePath)) {
+                    $model->image = 'uploads/' . $file->baseName . '.' . $file->extension;
+                } else {
+                    Yii::error("Помилка при завантаженні зображення.");
+                }
+            }
+
+            if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return $this->render('update', ['model' => $model]);
     }
+
     /**
      * Deletes an existing Songs model.
      * If deletion is successful, the browser will be redirected to the 'index' page.

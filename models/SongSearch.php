@@ -42,8 +42,7 @@ class SongSearch extends Songs
     {
         $query = Songs::find();
 
-        // add conditions that should always apply here
-
+        // добавьте условия, которые всегда должны применяться
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -51,24 +50,22 @@ class SongSearch extends Songs
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            // если валидация не проходит, возвращаем пустой результат
+            $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
+        // фильтрация по полям
         $query->andFilterWhere([
             'id' => $this->id,
             'year' => $this->year,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'artist', $this->artist])
-            ->andFilterWhere(['like', 'genre', $this->genre])
-            ->andFilterWhere(['like', 'image', $this->image]);
+            ->andFilterWhere(['like', 'genre', $this->genre]);
 
         return $dataProvider;
     }
+
 }

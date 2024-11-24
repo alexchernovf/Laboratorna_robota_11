@@ -28,23 +28,30 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
             'id',
             'name',
             'artist',
             'genre',
             'year',
-            //'created_at',
-            //'updated_at',
-            //'image',
             [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Songs $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                 }
+                'attribute' => 'image',
+                'format' => 'html',
+                'value' => function ($model) {
+                    if (!empty($model->image)) {
+                        $filePath = Yii::getAlias('@webroot/' . $model->image);
+                        if (file_exists($filePath)) {
+                            return Html::img(Yii::getAlias('@web/' . $model->image), ['style' => 'max-width: 100px;']);
+                        } else {
+                            Yii::error('Image not found at: ' . $filePath); // Логирование ошибки
+                            return 'Image not found';
+                        }
+                    } else {
+                        return 'No Image';
+                    }
+                },
             ],
+            ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
-
 
 </div>
