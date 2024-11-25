@@ -9,17 +9,22 @@ use yii\widgets\ActiveForm;
 
 <div class="songs-form">
 
-    <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); // Устанавливаем enctype для загрузки файлов ?>
+    <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'artist')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'content')->textarea(['rows' => 6]) ?>
+
+    <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
 
     <?= $form->field($model, 'genre')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'year')->textInput() ?>
 
     <?= $form->field($model, 'image')->fileInput() ?>
+
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

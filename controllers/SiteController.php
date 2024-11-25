@@ -1,6 +1,7 @@
 <?php
 namespace app\controllers;
 
+use app\models\Songs;
 use Yii;
 use yii\web\Controller;
 use app\models\User;
@@ -61,4 +62,21 @@ class SiteController extends Controller
         Yii::$app->user->logout();
         return $this->goHome();
     }
+
+    public function actionIndex()
+    {
+        $data = Songs::getAll(5);
+        $popular = Songs::getPopular();
+        $recent = Songs::getRecent();
+        $categories = Songs::getAll();
+
+        return $this->render('index',[
+            'articles'=>$data['articles'],
+            'pagination'=>$data['pagination'],
+            'popular'=>$popular,
+            'recent'=>$recent,
+            'categories'=>$categories
+        ]);
+    }
+
 }

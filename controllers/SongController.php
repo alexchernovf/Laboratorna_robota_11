@@ -10,10 +10,9 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\UploadedFile;
+use yii\helpers\ArrayHelper;
+use app\models\Category;
 
-/**
- * SongController implements the CRUD actions for Songs model.
- */
 class SongController extends Controller
 {
     /**
@@ -34,11 +33,7 @@ class SongController extends Controller
         );
     }
 
-    /**
-     * Lists all Songs models.
-     *
-     * @return string
-     */
+
     public function beforeAction($action)
     {
         // Перевірка, чи є користувач авторизованим і чи має роль адміністратора
@@ -60,12 +55,6 @@ class SongController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Songs model.
-     * @param int $id ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionView($id)
     {
         return $this->render('view', [
@@ -73,28 +62,21 @@ class SongController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new Songs model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
+
     public function actionCreate()
     {
         $model = new Songs();
 
         if (Yii::$app->request->isPost) {
             $model->load(Yii::$app->request->post());
+
             $file = UploadedFile::getInstance($model, 'image');
-
             if ($file) {
-
                 $filePath = Yii::getAlias('@webroot/uploads/' . $file->baseName . '.' . $file->extension);
-
-
                 if ($file->saveAs($filePath)) {
                     $model->image = 'uploads/' . $file->baseName . '.' . $file->extension;
                 } else {
-                    Yii::error("Помилка при завантаженні зображення.");
+                    Yii::error("Помилка");
                 }
             }
 
@@ -106,30 +88,20 @@ class SongController extends Controller
         return $this->render('create', ['model' => $model]);
     }
 
-    /**
-     * Updates an existing Songs model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
-        if (Yii::$app->request->isPost) {
-            $model->load(Yii::$app->request->post());
+        if ($model->load(Yii::$app->request->post())) {
+
+
             $file = UploadedFile::getInstance($model, 'image');
-
             if ($file) {
-
                 $filePath = Yii::getAlias('@webroot/uploads/' . $file->baseName . '.' . $file->extension);
-
-
                 if ($file->saveAs($filePath)) {
                     $model->image = 'uploads/' . $file->baseName . '.' . $file->extension;
                 } else {
-                    Yii::error("Помилка при завантаженні зображення.");
+                    Yii::error("Помилка.");
                 }
             }
 
@@ -141,13 +113,7 @@ class SongController extends Controller
         return $this->render('update', ['model' => $model]);
     }
 
-    /**
-     * Deletes an existing Songs model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -155,13 +121,53 @@ class SongController extends Controller
         return $this->redirect(['index']);
     }
 
-    /**
-     * Finds the Songs model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Songs the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    public function actionSetCategory($id)
+    {
+        $song = $this->findModel($id);
+
+        if (Yii::$app->request->isPost) {
+
+            $category = Yii::$app->request->post('Songs')['category_id'];
+            $song->category_id = $category;
+
+            if ($song->save()) {
+
+                return $this->redirect(['view', 'id' => $song->id]);
+            }
+        }
+
+
+        $categories = \yii\helpers\ArrayHelper::map(Category::find()->all(), 'id', 'title');
+
+
+        $selectedCategory = $song->category_id;
+
+        return $this->render('category', [
+            'song' => $song,
+            'categories' => $categories,
+            'selectedCategory' => $selectedCategory
+        ]);
+    }
+
+    public function actionSetTags($id)
+    {
+        $song = $this->findModel($id);
+        $selectedTags = $song->getSelectedTags();
+        $tags = ArrayHelper::map(Tag::find()->all(), 'id', 'title');
+        if (Yii::$app->request->isPost) {
+            $tags = Yii::$app->request->post('tags');
+            $song->saveTags($tags);
+            return $this->redirect(['view', 'id' => $song->id]);
+        }
+
+        // Передать переменные в представление
+        return $this->render('tags', [
+            'selectedTags' => $selectedTags,
+            'tags' => $tags
+        ]);
+    }
+
+
     protected function findModel($id)
     {
         if (($model = Songs::findOne(['id' => $id])) !== null) {

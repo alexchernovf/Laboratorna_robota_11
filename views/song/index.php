@@ -50,6 +50,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 },
             ],
+            [
+                'attribute' => 'content',
+                'value' => function ($model) {
+                    return Html::encode($model->content);
+                },
+            ],
+            [
+                'attribute' => 'description',
+                'value' => function ($model) {
+                    return Html::encode($model->description);
+                },
+            ],
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
