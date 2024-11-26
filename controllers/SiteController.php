@@ -15,6 +15,29 @@ class SiteController extends Controller
      * Регистрация пользователя
      */
 
+
+
+    public function actionIndex()
+    {
+        // Используем ActiveDataProvider для пагинации
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => Songs::find(),
+            'pagination' => [
+                'pageSize' => 10, // Количество записей на странице
+            ],
+        ]);
+
+        return $this->render('index', [
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+
+    public function actionView()
+    {
+        return $this->render('index');
+    }
+
     public function actionError()
     {
         $exception = Yii::$app->errorHandler->exception;
@@ -63,20 +86,6 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    public function actionIndex()
-    {
-        $data = Songs::getAll(5);
-        $popular = Songs::getPopular();
-        $recent = Songs::getRecent();
-        $categories = Songs::getAll();
 
-        return $this->render('index',[
-            'articles'=>$data['articles'],
-            'pagination'=>$data['pagination'],
-            'popular'=>$popular,
-            'recent'=>$recent,
-            'categories'=>$categories
-        ]);
-    }
 
 }
