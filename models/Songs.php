@@ -110,4 +110,10 @@ class Songs extends \yii\db\ActiveRecord
         return ($this->image) ? '/uploads/' . $this->image : '/no-image.png';
     }
 
+    public function getArtist()
+    {
+        return $this->hasOne(User::class, ['id' => 'artist']);
+    }
+
+
 }
