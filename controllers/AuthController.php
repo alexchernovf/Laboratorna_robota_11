@@ -39,19 +39,17 @@ class AuthController extends Controller
 
     public function actionSignup()
     {
-        $model = new SignupForm();
+        $model = new User();
 
-        if(Yii::$app->request->isPost)
-        {
-            $model->load(Yii::$app->request->post());
-            if($model->signup())
-            {
-                return $this->redirect(['auth/login']);
-            }
+
+        if ($model->load(Yii::$app->request->post()) && $model->signup()) {
+            Yii::$app->session->setFlash('success', 'Регистрация прошла успешно! Теперь вы можете войти.');
+            return $this->redirect(['login']);
         }
 
-        return $this->render('signup', ['model'=>$model]);
+        return $this->render('signup', ['model' => $model]);
     }
+    
 
     public function actionTest()
     {

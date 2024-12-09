@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace app\models;
 
@@ -15,10 +15,11 @@ use yii\db\ActiveRecord;
  * @property string $email
  * @property string $password_hash
  * @property string $auth_key
+ * @property bool $isAdmin [Read-only] Determines if the user is an admin
  */
 class User extends ActiveRecord implements IdentityInterface
 {
-    public $password; // Пароль при регистрации
+    public $password; // Password for registration
 
     /**
      * {@inheritdoc}
@@ -28,7 +29,6 @@ class User extends ActiveRecord implements IdentityInterface
         return 'user';
     }
 
-
     public function rules()
     {
         return [
@@ -37,7 +37,6 @@ class User extends ActiveRecord implements IdentityInterface
             ['password', 'string', 'min' => 6],
         ];
     }
-
 
     public function beforeSave($insert)
     {
@@ -55,11 +54,9 @@ class User extends ActiveRecord implements IdentityInterface
         return false;
     }
 
-
     public function signup()
     {
         if ($this->validate()) {
-
             return $this->save();
         }
         return false;
@@ -111,6 +108,8 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
+     * Validates the given password.
+     *
      * @param string $password
      * @return bool
      */
@@ -119,5 +118,13 @@ class User extends ActiveRecord implements IdentityInterface
         return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
 
-
+    /**
+     * Checks if the user is an admin.
+     *
+     * @return bool
+     */
+    public function getIsAdmin()
+    {
+        return (bool)$this->is_admin; // Maps to the `is_admin` column in the database
+    }
 }

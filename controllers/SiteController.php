@@ -4,38 +4,77 @@ namespace app\controllers;
 use app\models\Songs;
 use Yii;
 use yii\web\Controller;
-use app\models\User;
-use app\models\LoginForm;
+use app\models\CommentForm;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use app\models\Article; // Import the Article model
+use app\models\Category;
+use yii\data\Pagination; // Import the Pagination class
+use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
 
 class SiteController extends Controller
 {
-    /**
-     * Регистрация пользователя
-     */
+    
+
 
 
 
     public function actionIndex()
     {
-        // Используем ActiveDataProvider для пагинации
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => Songs::find(),
-            'pagination' => [
-                'pageSize' => 10, // Количество записей на странице
-            ],
-        ]);
+        $data=Article::getAll();
 
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-        ]);
+        $popular=Article::getPopular();
+        $recent=Article::getRecent();
+        $categories = Category::getAll();
+
+        return $this->render('index',[
+            'articles'=>$data['articles'],
+            'pagination'=>$data['pagination'],
+            'popular'=>$popular,
+            'recent'=>$recent,
+            'categories'=>$categories]);
+            
     }
 
-
-    public function actionView()
+    public function actionView($id)
     {
-        return $this->render('index');
+        $article=Article::findOne($id);
+        $popular=Article::getPopular();
+        $recent=Article::getRecent();
+        $categories = Category::getAll();
+        $comments = $article->getArticleComments();
+        $commentForm = new CommentForm();
+
+        $article->viewedCounter();
+
+        $tags = ArrayHelper::map($article->tags, 'id', 'title');
+        return $this->render('single',[
+
+            'article'=>$article,
+            'tags'=>$tags,
+            'popular'=>$popular,
+            'recent'=>$recent,
+            'categories'=>$categories,
+            'comments'=>$comments,
+            'commentForm'=>$commentForm
+        ]);
+        
+    }
+
+    public function actionCategory($id)
+    {
+        $data=Category::getArticlesByCategory($id);
+        $popular=Article::getPopular();
+        $recent=Article::getRecent();
+        $categories = Category::getAll();
+        return $this->render('category',[
+            'articles'=>$data['articles'],
+            'pagination'=>$data['pagination'],
+            'popular'=>$popular,
+            'recent'=>$recent,
+            'categories'=>$categories
+        ]);
     }
 
     public function actionError()
@@ -46,46 +85,57 @@ class SiteController extends Controller
         }
     }
 
-    public function actionSignup()
+
+    public function actionTag($id)
     {
-        $model = new User();
-
-
-        if ($model->load(Yii::$app->request->post()) && $model->signup()) {
-            Yii::$app->session->setFlash('success', 'Регистрация прошла успешно! Теперь вы можете войти.');
-            return $this->redirect(['site/login']);
+        $tag = Tag::findOne($id);
+        if (!$tag) {
+            throw new NotFoundHttpException('Tag not found.');
         }
-
-        return $this->render('signup', ['model' => $model]);
+    
+        // Get all articles associated with the tag
+        $query = $tag->getArticles();
+    
+        // Set up pagination
+        $pagination = new \yii\data\Pagination(['totalCount' => $query->count(), 'pageSize' => 5]);
+    
+        $articles = $query->offset($pagination->offset)
+            ->limit($pagination->limit)
+            ->all();
+    
+        // Initialize variables for the sidebar
+        $popular = Article::getPopular();
+        $recent = Article::getRecent();
+        $categories = Category::getAll();
+    
+        return $this->render('tag', [
+            'tag' => $tag,
+            'articles' => $articles,
+            'pagination' => $pagination,
+            'popular' => $popular, // Pass to the view
+            'recent' => $recent,
+            'categories' => $categories,
+        ]);
     }
+    
 
     /**
-     * Вход пользователя
+     * display about page
      */
-    public function actionLogin()
+    public function actionComment($id)
     {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+        $model = new CommentForm();
+        
+        if(Yii::$app->request->isPost)
+        {
+            $model->load(Yii::$app->request->post());
+            if($model->saveComment($id))
+            {
+                Yii::$app->getSession()->setFlash('comment', 'Your comment will be added soon!');
+                return $this->redirect(['site/view','id'=>$id]);
+            }
         }
-
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        }
-
-        $model->password = '';
-        return $this->render('login', ['model' => $model]);
     }
-
-    /**
-     * Выйти из системы
-     */
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-        return $this->goHome();
-    }
-
 
 
 }
